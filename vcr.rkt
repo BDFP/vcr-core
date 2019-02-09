@@ -2,40 +2,40 @@
 
 (provide vcr-dispatch)
 
-(require simple-http)
-(require net/uri-codec)
-(require net/sendurl)
 (require web-server/servlet
-         web-server/servlet-env)
+         web-server/servlet-env
+         web-server/http
+         web-server/http/request-structs
+         web-server/http/response-structs
+         web-server/private/url-param)
 (require web-server/dispatch)
+(require json)
+(require "spotify.rkt")
 
-(define client-id "711251ddb15c4ec4947e7b31750f085d")
-(define client-secret "34cc7fcc716742019a8db13603d9781f")
+(define-syntax (token-url url)
+    #'spotify-auth-token-redirect-url)
 
-(define spotify-api-base-url "https://api.spotify.com/")
-(define spotify-auth-base-url "https://accounts.spotify.com/")
+(define a "abcd")
 
+(define (json-response req)
+  (response 200
+            #"OK"
+            (current-seconds)
+            #"application/json; charset=utf-8"
+            empty
+            (λ (op) (write-json #hasheq((waffle . (1 2 3))) op))))
+  
 
-(define spotify-auth
-  (update-headers
-   (update-ssl
-    (update-host json-requester spotify-auth-base-url) #t)
-   '("Authorization: 8675309")))
-
-(define spotify-auth-param (alist->form-urlencoded (list (cons 'client_id  client-id)
-                                                         (cons 'response_type "code")
-                                                         (cons 'redirect_uri  "http://localhost:9090/spotify-cb"))))
-
-(define spotify-auth-url (string-append spotify-auth-base-url "?" spotify-auth-param))
-
-;(send-url spotify-auth-url)
+(define (hello req)
+  (define code (extract-binding/single 'code (request-bindings req)))
+  (define res (fetch-token code))
+  (println res)
+  
+  (response/xexpr
+   `(html (head (title "Hello world!"))
+          (body (p ,(string-append "Hey out there! " code))))))
 
 (define-values (vcr-dispatch vcr-url)
   (dispatch-rules
-   [("spotify-cb") hello]))
-
-(define (hello req)
-  (response/xexpr
-   `(html (head (title "Hello world!"))
-          (body (p "Hey out there!")))))
-
+   [("spotify-cb")  hello]
+   [("spotify-token") #:method "get" json-response]))
