@@ -1,0 +1,12 @@
+* Vcr
+
+A music application.
+
+** Dev setup
+
++ Create a keys.rkt and enter your client-id and client-secret.
++ Run migrations: 
+  #+BEGIN_SRC bash
+  racket migrations.rkt
+  #+END_SRC
++ Run client.rkt 

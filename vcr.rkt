@@ -33,7 +33,7 @@
   
   (response/xexpr
    `(html (head (title "Hello world!"))
-          (body (p ,(string-append "Hey out there! " code))))))
+          (body (p "Hey out there! ")))))
 
 (define-values (vcr-dispatch vcr-url)
   (dispatch-rules

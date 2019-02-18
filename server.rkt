@@ -16,6 +16,8 @@
   (serve/servlet request-handler
                #:stateless? #t
                #:servlet-regexp #rx""
+               #:server-root-path "."
+               #:servlet-current-directory "."
                #:port 9090))
 
 (main)
